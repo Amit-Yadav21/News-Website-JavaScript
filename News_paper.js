@@ -1,58 +1,58 @@
-async function getTopHeadlines() {
-    const response = await fetch('/GetAllNews.json');
-    try {
-        if (!response.ok) {
-            console.error("No data available");
-        }
-        const data = await response.json();
-        displayArticles(data.articles);
+document.addEventListener('DOMContentLoaded', (event) => {
+    const searchButton = document.getElementById('searchButton');
+    const searchInput = document.getElementById('searchInput');
+    const newsContainer = document.getElementById('newsContainer');
+
+    async function fetchNews(query) {
+        const apiKey = '0d4d93237b364b27aed4c48768350fdd';
+        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}`;
         
-    } catch (error) {
-        console.error(error.message);
-        alert("Failed to search top headlines. Please try again.");
-    }
-}
-
-getTopHeadlines();
-
-
-function displayArticles(articles) {
-    const newsContainer = document.getElementById("newsContainer");
-    newsContainer.innerHTML = "";
-    if (articles.length === 0) {
-        newsContainer.innerHTML = "<h1>No articles found.</h1>";
-        return;
-    }
-    articles.map((article) => {
-        newsContainer.innerHTML += `
-        <div class="newsArticle">
-            <img src="${article.urlToImage}" onerror="this.src='Error-Img.png';" />
-            <h2>${article.title}</h2>
-            <p>${article.description}</p>
-            <h3> Read full article <a target = "_blank" href = "${article.url}">&#8594;</a></h3>
-        </div>`;
-    });
-}
-
-async function searchNews() {
-    const searchInput = document.getElementById("searchInput").value.trim();
-    if (searchInput === "") {
-        alert("Please enter something for search.");
-        return;
-    }
-    const response = await fetch(`https://newsapi.org/v2/everything?q=${searchInput}&apiKey=0d4d93237b364b27aed4c48768350fdd`);
-    try {
-        if (!response.ok) {
-            console.error("No data available");
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            displayNews(data.articles);
+        } catch (error) {
+            console.error('Error fetching news:', error);
         }
-        const data = await response.json();
-        displayArticles(data.articles);
-        if (data.articles.length === 0) {
-            alert("No articles found for the given search.");
-        }
-    } catch (error) {
-        console.error(error.message);
-        alert("Failed to fetch search results. Please try again later.");
     }
-}
 
+    function displayNews(articles) {
+        newsContainer.innerHTML = '';
+        articles.forEach(article => {
+            if (article.title && article.description && article.urlToImage) { // Ensure title, description, and image exist
+                const newsArticle = document.createElement('div');
+                newsArticle.classList.add('newsArticle');
+                
+                const articleImage = document.createElement('img');
+                articleImage.src = article.urlToImage; // Use image from the article
+                newsArticle.appendChild(articleImage);
+                
+                const articleTitle = document.createElement('h2');
+                articleTitle.textContent = article.title;
+                newsArticle.appendChild(articleTitle);
+                
+                const articleDescription = document.createElement('p');
+                articleDescription.textContent = article.description;
+                newsArticle.appendChild(articleDescription);
+                
+                const readMoreLink = document.createElement('a');
+                readMoreLink.href = article.url;
+                readMoreLink.textContent = 'Read More...';
+                readMoreLink.target = '_blank'; // Open link in a new tab
+                newsArticle.appendChild(readMoreLink);
+                
+                newsContainer.appendChild(newsArticle);
+            }
+        });
+    }
+
+    function searchNews() {
+        const query = searchInput.value;
+        fetchNews(query);
+    }
+
+    // Fetch and display news by default
+    fetchNews('latest');
+
+    searchButton.addEventListener('click', searchNews);
+});
