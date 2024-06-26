@@ -18,13 +18,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     function displayNews(articles) {
         newsContainer.innerHTML = '';
-        articles.forEach(article => {
-            if (article.title && article.description && article.urlToImage) { // Ensure title, description, and image exist
+        const validArticles = articles.filter(article => article.title && article.description && article.urlToImage);
+
+        if (validArticles.length === 0) {
+            const noResultsMessage = document.createElement('div');
+            noResultsMessage.classList.add('noResultsMessage');
+            noResultsMessage.innerHTML = `<p>No news found 😞</p>`;
+            newsContainer.appendChild(noResultsMessage);
+        } else {
+            validArticles.forEach(article => {
                 const newsArticle = document.createElement('div');
                 newsArticle.classList.add('newsArticle');
                 
                 const articleImage = document.createElement('img');
-                articleImage.src = article.urlToImage; // Use image from the article
+                articleImage.src = article.urlToImage;
                 newsArticle.appendChild(articleImage);
                 
                 const articleTitle = document.createElement('h2');
@@ -37,13 +44,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 
                 const readMoreLink = document.createElement('a');
                 readMoreLink.href = article.url;
-                readMoreLink.textContent = 'Read More...';
-                readMoreLink.target = '_blank'; // Open link in a new tab
+                readMoreLink.textContent = 'Read More';
+                readMoreLink.target = '_blank';
                 newsArticle.appendChild(readMoreLink);
                 
                 newsContainer.appendChild(newsArticle);
-            }
-        });
+            });
+        }
     }
 
     function searchNews() {
@@ -51,7 +58,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         fetchNews(query);
     }
 
-    // Fetch and display news by default
     fetchNews('latest');
 
     searchButton.addEventListener('click', searchNews);
